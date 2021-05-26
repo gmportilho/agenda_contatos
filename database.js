@@ -26,9 +26,39 @@ const pool = new Pool({
 //})
 
 module.exports = {
-    
-    aync create(nome, telefone){
-        const sql = `INSERT INTO contatos (nome, telefone) VALUES ($1, $2)`;
-        const result = await pool.query(sql, [nome, telefone]);
+
+    async create(nome, telefone) {
+        try {
+            const sql = `INSERT INTO contatos (nome, telefone) VALUES ($1, $2) RETURNING id`;
+            const result = await pool.query(sql, [nome, telefone]);
+            return result.rows[0].id;
+        }catch(error) {
+            console.log(error);
+            return -1;
+        }
+    },
+
+    async read() {
+        const sql = `SELECT * FROM contatos order by nome`;
+        const result = await pool.query(sql);
+        return result.rows;
+    },
+
+    async find(id) {
+        const sql = `SELECT * FROM contatos WHERE ID = $1`;
+        const result = await pool.query(sql, [id]);
+        return result.rows;
+    },
+
+    async update(id, nome, telefone) {
+        const sql = `UPDATE contatos SET nome = $1, telefone = $2 WHERE ID = $3`;
+        const result = await pool.query(sql, [nome, telefone, id]);
+        return result.rows;
+    },
+
+    async delete(id) {
+        const sql = `DELETE FROM contatos WHERE ID = $1`;
+        const result = await pool.query(sql, [id]);
+        return result.rows;
     }
 }
